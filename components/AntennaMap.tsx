@@ -1,76 +1,96 @@
-'use client'
+'use client';
 
-import { useState, useCallback, useEffect } from 'react'
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
-import { Checkbox } from '@/components/ui/checkbox'
-import { Label } from '@/components/ui/label'
-import { Switch } from '@/components/ui/switch'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
-import { ScrollArea } from '@/components/ui/scroll-area'
-import { Button } from '@/components/ui/button'
-import { generateAntennaMapSVG } from '@/lib/svgMapGenerator'
-import { antennaGroups } from '@/lib/antennaData'
-import { Antenna } from '@/lib/types'
-import { AntennaPopup } from './AntennaPopup'
-import { FileUpload } from './FileUpload'
-import { Download } from 'lucide-react'
+import { useState, useCallback, useEffect } from 'react';
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+} from '@/components/ui/card';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Label } from '@/components/ui/label';
+import { Switch } from '@/components/ui/switch';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { Button } from '@/components/ui/button';
+import { generateAntennaMapSVG } from '@/lib/svgMapGenerator';
+import { antennaGroups } from '@/lib/antennaData';
+import { Antenna } from '@/lib/types';
+import { AntennaPopup } from './AntennaPopup';
+import { FileUpload } from './FileUpload';
+import { Download } from 'lucide-react';
 
 export function AntennaMap() {
-  const [selectedAntenna, setSelectedAntenna] = useState<Antenna | null>(null)
-  const [selectedGroups, setSelectedGroups] = useState<Set<string>>(new Set())
-  const [showConnections, setShowConnections] = useState(true)
-  const [dataLoaded, setDataLoaded] = useState(false)
+  const [selectedAntenna, setSelectedAntenna] = useState<Antenna | null>(null);
+  const [selectedGroups, setSelectedGroups] = useState<Set<string>>(new Set());
+  const [showConnections, setShowConnections] = useState(true);
+  const [dataLoaded, setDataLoaded] = useState(false);
 
   const handleAntennaClick = useCallback((antenna: Antenna) => {
-    setSelectedAntenna(antenna)
-  }, [])
+    setSelectedAntenna(antenna);
+  }, []);
 
   useEffect(() => {
-    window.handleAntennaClick = handleAntennaClick
-  }, [handleAntennaClick])
+    window.handleAntennaClick = handleAntennaClick;
+  }, [handleAntennaClick]);
 
   const handleGroupToggle = (group: string) => {
     setSelectedGroups((prev) => {
-      const newSet = new Set(prev)
+      const newSet = new Set(prev);
       if (newSet.has(group)) {
-        newSet.delete(group)
+        newSet.delete(group);
       } else {
-        newSet.add(group)
+        newSet.add(group);
       }
-      return newSet
-    })
-  }
+      return newSet;
+    });
+  };
 
   const handleDataLoaded = () => {
-    setDataLoaded(true)
-    setSelectedGroups(new Set(antennaGroups.map(group => group.id)))
-  }
+    setDataLoaded(true);
+    setSelectedGroups(new Set(antennaGroups.map((group) => group.id)));
+  };
 
   const filteredAntennas = antennaGroups
-    .filter(group => selectedGroups.has(group.id))
-    .flatMap(group => group.antennas)
+    .filter((group) => selectedGroups.has(group.id))
+    .flatMap((group) => group.antennas);
 
-  const svgContent = generateAntennaMapSVG(filteredAntennas, handleAntennaClick, selectedGroups, antennaGroups)
+  const svgContent = generateAntennaMapSVG(
+    filteredAntennas,
+    handleAntennaClick,
+    selectedGroups,
+    antennaGroups
+  );
 
   const handleExportSVG = () => {
-    const blob = new Blob([svgContent], { type: 'image/svg+xml' })
-    const url = URL.createObjectURL(blob)
-    const link = document.createElement('a')
-    link.href = url
-    link.download = 'antenna_map.svg'
-    document.body.appendChild(link)
-    link.click()
-    document.body.removeChild(link)
-    URL.revokeObjectURL(url)
-  }
+    const blob = new Blob([svgContent], { type: 'image/svg+xml' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = 'antenna_map.svg';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  };
 
   return (
     <div className="space-y-6">
       <Card>
         <CardHeader>
           <CardTitle>Antenna Map Configuration</CardTitle>
-          <CardDescription>Upload YAML file and configure map settings</CardDescription>
+          <CardDescription>
+            Upload YAML file and configure map settings
+          </CardDescription>
         </CardHeader>
         <CardContent>
           <Tabs defaultValue="upload" className="w-full">
@@ -109,18 +129,26 @@ export function AntennaMap() {
                               <Checkbox
                                 id={group.id}
                                 checked={selectedGroups.has(group.id)}
-                                onCheckedChange={() => handleGroupToggle(group.id)}
+                                onCheckedChange={() =>
+                                  handleGroupToggle(group.id)
+                                }
                               />
                             </TableCell>
                             <TableCell>
-                              <Label htmlFor={group.id} className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                              <Label
+                                htmlFor={group.id}
+                                className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                              >
                                 {group.id}
                               </Label>
                             </TableCell>
                             <TableCell>{group.antennas.length}</TableCell>
                             <TableCell>
                               <div className="flex items-center space-x-2">
-                                <div className="w-4 h-4 rounded-full" style={{backgroundColor: group.color}}></div>
+                                <div
+                                  className="w-4 h-4 rounded-full"
+                                  style={{ backgroundColor: group.color }}
+                                ></div>
                                 <span className="text-sm">{group.color}</span>
                               </div>
                             </TableCell>
@@ -131,7 +159,9 @@ export function AntennaMap() {
                   </ScrollArea>
                 </div>
               ) : (
-                <p className="text-sm text-muted-foreground">Please upload a YAML file first.</p>
+                <p className="text-sm text-muted-foreground">
+                  Please upload a YAML file first.
+                </p>
               )}
             </TabsContent>
           </Tabs>
@@ -142,7 +172,9 @@ export function AntennaMap() {
           <CardHeader className="flex flex-row items-center justify-between">
             <div>
               <CardTitle>Antenna Position Map</CardTitle>
-              <CardDescription>Interactive map of antenna positions</CardDescription>
+              <CardDescription>
+                Interactive map of antenna positions
+              </CardDescription>
             </div>
             <Button onClick={handleExportSVG} variant="outline">
               <Download className="mr-2 h-4 w-4" />
@@ -150,18 +182,22 @@ export function AntennaMap() {
             </Button>
           </CardHeader>
           <CardContent>
-            <div 
+            <div
               key={Array.from(selectedGroups).join(',')}
-              dangerouslySetInnerHTML={{ __html: svgContent }} 
-              className={`w-full h-[600px] overflow-auto ${showConnections ? '' : '[&_path]:hidden'}`}
+              dangerouslySetInnerHTML={{ __html: svgContent }}
+              className={`w-full h-[600px] overflow-auto ${
+                showConnections ? '' : '[&_path]:hidden'
+              }`}
             />
           </CardContent>
         </Card>
       )}
       {selectedAntenna && (
-        <AntennaPopup antenna={selectedAntenna} onClose={() => setSelectedAntenna(null)} />
+        <AntennaPopup
+          antenna={selectedAntenna}
+          onClose={() => setSelectedAntenna(null)}
+        />
       )}
     </div>
-  )
+  );
 }
-
